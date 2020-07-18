@@ -1,0 +1,1 @@
+dotnet aspnet-codegenerator controller -name MainStoreController -async -api -m MainStore -dc MyShopperContext -outDir Controllers
