@@ -9,7 +9,7 @@ namespace MyShopperAPI.Models
         public int ShoppingListId { get; set; }
         public int StoreId { get; set; }
 
-        public virtual ShoppingList ShoppingList { get; set; }
-        public virtual Store Store { get; set; }
+        //public virtual ShoppingList ShoppingList { get; set; }
+        //public virtual Store Store { get; set; }
     }
 }

@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyShopperAPI.Models;
+using MyShopperAPI.Wrappers;
 
 namespace MyShopperAPI.Controllers
 {
-    [Route("api/Products")]
+    [Route("api/Product")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -21,11 +22,75 @@ namespace MyShopperAPI.Controllers
         }
 
         // GET: api/Products
+        //[HttpGet("{page}/{pageSize}")]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProduct(int page , int pageSize)
+        //{
+        //    var PagedData = await _context.Product
+        //                    .Skip((page - 1) * pageSize)
+        //                    .Take(pageSize)
+        //                    .ToListAsync();
+        //    var TotalRecords = await _context.Product.CountAsync();
+
+        //    return PagedData;
+
+        //}
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProduct()
+        public async Task<IActionResult> GetProduct([FromQuery] PaginationFilter filter)
         {
-            return await _context.Product.ToListAsync();
+            
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            var pagedData = await _context.Product
+                           .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                           .Take(validFilter.PageSize)
+                           .ToListAsync();
+            var TotalRecords = await _context.Product.CountAsync();
+            var TotalPages = Convert.ToInt32(Math.Ceiling(((double)TotalRecords / (double)validFilter.PageSize)));
+            var Response = new PagedResponse<List<Product>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
+
+            Response.TotalRecords = TotalRecords;
+            Response.TotalPages = TotalPages;
+
+            return Ok(Response);
+
         }
+
+        [HttpGet("Search")]
+        public async Task<IActionResult> SearchProduct([FromQuery] String Search , [FromQuery] PaginationFilter filter)
+        {
+
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            var pagedData = await _context.Product.Where(p => p.ProductName.ToLower().StartsWith(Search))
+                           .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                           .Take(validFilter.PageSize)
+                           .ToListAsync();
+            //var TotalRecords = await _context.Product.CountAsync();
+            var TotalRecords = await _context.Product.Where(p => p.ProductName.ToLower().StartsWith(Search))
+                               .CountAsync();
+            var TotalPages = Convert.ToInt32(Math.Ceiling(((double)TotalRecords / (double)validFilter.PageSize)));
+            var Response = new PagedResponse<List<Product>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
+
+            Response.TotalRecords = TotalRecords;
+            Response.TotalPages = TotalPages;
+
+            return Ok(Response);
+        }
+
+        //[HttpGet("ShoppingListProduct/{id}")]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetShoppingListProducts(int id)
+        //{
+
+        //    var shoppingList = await _context.ShoppingListProduct.Include(slp => slp.Product).Where(slp => slp.ShoppingListId == id).ToListAsync();
+        //    var Products = new List<Product>();
+
+        //    foreach (var shoppingListProduct in shoppingList)
+        //    {
+        //        Products.Add(shoppingListProduct.Product);
+        //    }
+
+        //    return Products;
+
+        //}
 
         // GET: api/Products/5
         [HttpGet("{id}")]
@@ -50,6 +115,21 @@ namespace MyShopperAPI.Controllers
             if (id != product.ProductId)
             {
                 return BadRequest();
+            }
+
+            var CurrentProduct = await _context.Product.FindAsync(id);
+
+            if (CurrentProduct.CurrentPrice != product.CurrentPrice)
+            {
+
+                var newPriceHistory = new PriceHistory();
+                newPriceHistory.ProductId = product.ProductId;
+                newPriceHistory.DateFrom = product.PriceCreationDate;
+                newPriceHistory.DateTo = DateTime.Now;
+                newPriceHistory.Price = CurrentProduct.CurrentPrice;
+                _context.PriceHistory.Add(newPriceHistory);
+                await _context.SaveChangesAsync();
+
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -79,6 +159,9 @@ namespace MyShopperAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
+
+            product.PriceCreationDate = DateTime.Now;
+
             _context.Product.Add(product);
             await _context.SaveChangesAsync();
 

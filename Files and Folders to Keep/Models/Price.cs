@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyShopperAPI.Models
 {
@@ -7,13 +8,14 @@ namespace MyShopperAPI.Models
     {
         public Price()
         {
-            ProductPrice = new HashSet<ProductPrice>();
+            //ProductPrice = new HashSet<ProductPrice>();
         }
 
         public int PriceId { get; set; }
+        [DataType(DataType.Currency)]
         public decimal Price1 { get; set; }
-        public DateTime PriceCreationDate { get; set; }
+        
 
-        public virtual ICollection<ProductPrice> ProductPrice { get; set; }
+       // public virtual ICollection<ProductPrice> ProductPrice { get; set; }
     }
 }

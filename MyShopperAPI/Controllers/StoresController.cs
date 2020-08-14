@@ -11,23 +11,23 @@ namespace MyShopperAPI.Controllers
 {
     [Route("api/Store")]
     [ApiController]
-    public class StoreController : ControllerBase
+    public class StoresController : ControllerBase
     {
         private readonly MyShopperContext _context;
 
-        public StoreController(MyShopperContext context)
+        public StoresController(MyShopperContext context)
         {
             _context = context;
         }
 
-        // GET: api/Store
+        // GET: api/Stores
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Store>>> GetStore()
         {
             return await _context.Store.ToListAsync();
         }
 
-        // GET: api/Store/5
+        // GET: api/Stores/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Store>> GetStore(int id)
         {
@@ -41,7 +41,20 @@ namespace MyShopperAPI.Controllers
             return store;
         }
 
-        // PUT: api/Store/5
+        [HttpGet("GetStores/{id}")]
+        public async Task<ActionResult<IEnumerable<Store>>> GetStores(int id)
+        {
+            var stores = await _context.Store.Where(s => s.MainStoreId == id).ToListAsync();
+
+            if (stores == null)
+            {
+                return NotFound();
+            }
+
+            return stores;
+        }
+
+        // PUT: api/Stores/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
@@ -70,29 +83,22 @@ namespace MyShopperAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return CreatedAtAction("GetStore", new { id = store.StoreId }, store);
         }
 
-        // POST: api/Store
+        // POST: api/Stores
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost("{id}")]
-        public async Task<ActionResult<Store>> PostStore(Store store, int id)
+        [HttpPost]
+        public async Task<ActionResult<Store>> PostStore(Store store)
         {
             _context.Store.Add(store);
-            await _context.SaveChangesAsync();
-
-            MainStoreStore mainStoreStore = new MainStoreStore();
-            mainStoreStore.MainStoreId = id;
-            mainStoreStore.StoreId = store.StoreId;
-
-            _context.MainStoreStore.Add(mainStoreStore);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetStore", new { id = store.StoreId }, store);
         }
 
-        // DELETE: api/Store/5
+        // DELETE: api/Stores/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Store>> DeleteStore(int id)
         {

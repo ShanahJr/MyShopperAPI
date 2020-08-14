@@ -5,10 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200708182951_AddedImageToMainStore.cs" />
-    <Compile Remove="Migrations\20200708182951_AddedImageToMainStore.Designer.cs" />
-    <Compile Remove="Migrations\20200717163407_AddedImageToMainStore.cs" />
-    <Compile Remove="Migrations\20200717163407_AddedImageToMainStore.Designer.cs" />
+    <Compile Remove="Migrations\20200727222017_RemovedProductCategory.cs" />
+    <Compile Remove="Migrations\20200727222017_RemovedProductCategory.Designer.cs" />
+    <Compile Remove="Migrations\20200730143948_RemovedProductPriceAndPriceFromContext.cs" />
+    <Compile Remove="Migrations\20200730143948_RemovedProductPriceAndPriceFromContext.Designer.cs" />
+    <Compile Remove="Migrations\20200730144502_InitialModel.cs" />
+    <Compile Remove="Migrations\20200730144502_InitialModel.Designer.cs" />
+    <Compile Remove="Migrations\20200804095928_AddedTwoColumsToShoppingListProduct.cs" />
+    <Compile Remove="Migrations\20200804095928_AddedTwoColumsToShoppingListProduct.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +29,15 @@
     </PackageReference>
     
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
+    
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.0" />
+    
+    <PackageReference Include="X.PagedList.Mvc.Core" Version="8.0.7" />
   </ItemGroup>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
 
 
 </Project>

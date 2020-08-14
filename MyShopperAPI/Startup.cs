@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyShopperAPI.Models;
 using System;
+using System.Reflection;
+using System.IO;
+using Microsoft.OpenApi.Models;
 
 namespace MyShopperAPI
 {
@@ -39,12 +42,37 @@ namespace MyShopperAPI
            });
 
             services.AddControllers()
-                .AddNewtonsoftJson( options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore );
+            .AddNewtonsoftJson(
+            options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
+                options.SerializerSettings.DateFormatString = "yyyy'-'MM'-'dd' 'HH':'mm''";
+            }
+            );
             services.AddDbContext<MyShopperContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("Database"), builder =>
                     builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
                 ));
-        }
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "My Shopper App API",
+                    Description = "A .Net Core API that I created for my Shopping List App made with Ionic",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Shanah Jr Suping",
+                        Email = "shanahjr@gmail.com",
+                        Url = new Uri("https://shanahjr.co.za"),
+                    },
+                });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+        }// ConfigureServices
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -65,6 +93,14 @@ namespace MyShopperAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
             });
         }
     }

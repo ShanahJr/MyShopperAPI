@@ -24,14 +24,29 @@ namespace MyShopperAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ShoppingListProduct>>> GetShoppingListProduct()
         {
-            return await _context.ShoppingListProduct.ToListAsync();
+            return await _context.ShoppingListProduct.Include( slp => slp.Product ).ToListAsync();
         }
 
         // GET: api/ShoppingListProducts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ShoppingListProduct>> GetShoppingListProduct(int id)
         {
-            var shoppingListProduct = await _context.ShoppingListProduct.FindAsync(id);
+            var shoppingListProduct = await _context.ShoppingListProduct.Include(slp => slp.Product)
+                .Where(slp => slp.ShoppingListProductId == id).FirstOrDefaultAsync();
+
+            if (shoppingListProduct == null)
+            {
+                return NotFound();
+            }
+
+            return shoppingListProduct;
+        }
+
+        [HttpGet("GetShoppingList/{id}")]
+        public async Task<ActionResult<IEnumerable<ShoppingListProduct>>> GetShoppingList(int id)
+        {
+            var shoppingListProduct = await _context.ShoppingListProduct.Include(slp => slp.Product)
+                .Where(slp => slp.ShoppingListId == id).ToListAsync();
 
             if (shoppingListProduct == null)
             {
@@ -82,7 +97,12 @@ namespace MyShopperAPI.Controllers
             _context.ShoppingListProduct.Add(shoppingListProduct);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetShoppingListProduct", new { id = shoppingListProduct.ShoppingListProductId }, shoppingListProduct);
+            var newShoppingListProduct = await _context.ShoppingListProduct.Include(slp => slp.Product)
+                                        .Where(slp => slp.ShoppingListProductId == shoppingListProduct.ShoppingListProductId)
+                                        .FirstOrDefaultAsync();
+
+            return newShoppingListProduct;
+            //return CreatedAtAction("GetShoppingListProduct", new { id = shoppingListProduct.ShoppingListProductId }, shoppingListProduct);
         }
 
         // DELETE: api/ShoppingListProducts/5

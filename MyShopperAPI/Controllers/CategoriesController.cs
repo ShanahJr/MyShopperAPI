@@ -9,7 +9,7 @@ using MyShopperAPI.Models;
 
 namespace MyShopperAPI.Controllers
 {
-    [Route("api/Categories")]
+    [Route("api/Category")]
     [ApiController]
     public class CategoriesController : ControllerBase
     {

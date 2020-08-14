@@ -9,7 +9,7 @@ using MyShopperAPI.Models;
 
 namespace MyShopperAPI.Controllers
 {
-    [Route("api/ShoppingLists")]
+    [Route("api/ShoppingList")]
     [ApiController]
     public class ShoppingListsController : ControllerBase
     {
@@ -39,6 +39,19 @@ namespace MyShopperAPI.Controllers
             }
 
             return shoppingList;
+        }
+
+        [HttpGet("GetShoppingLists/{id}")]
+        public async Task<ActionResult<IEnumerable<ShoppingList>>> GetShoppingLists(int id)
+        {
+            var shoppingLists = await _context.ShoppingList.Where(sl => sl.StoreId == id).ToListAsync();
+
+            if (shoppingLists == null)
+            {
+                return NotFound();
+            }
+
+            return shoppingLists;
         }
 
         // PUT: api/ShoppingLists/5
@@ -79,6 +92,9 @@ namespace MyShopperAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ShoppingList>> PostShoppingList(ShoppingList shoppingList)
         {
+
+            shoppingList.CreationDate = DateTime.Now;
+
             _context.ShoppingList.Add(shoppingList);
             await _context.SaveChangesAsync();
 

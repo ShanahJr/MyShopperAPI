@@ -44,35 +44,41 @@ namespace MyShopperAPI.Controllers
         // PUT: api/MainStoreStore/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut]
-        public async Task<IActionResult> PutMainStoreStore(MainStoreStore mainStoreStore)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMainStoreStore(MainStoreStore mainStoreStore , int id)
         {
             //if (id != mainStoreStore.MainStoreStoreId)
             //{
             //    return BadRequest();
             //}
 
-            _context.Entry(mainStoreStore).State = EntityState.Modified;
+            //id is the Current Main Store ID and the MainStoreID in the object Parameter is the new one.
 
-            try
-            {
+            var ChangerObject = _context.MainStoreStore.Where(mss => mss.MainStoreId == id && 
+            mss.StoreId == mainStoreStore.StoreId).FirstOrDefault();
+            ChangerObject.MainStoreId = mainStoreStore.MainStoreId;
+
+            _context.Entry(ChangerObject).State = EntityState.Modified;
+
+            //try
+            //{
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                //if (!MainStoreStoreExists(id))
-                //{
-                //    return NotFound();
-                //}
-                //else
-                //{
-                //    throw;
-                //}
+            //}
+            //catch (DbUpdateConcurrencyException)
+            ///{
+            //if (!MainStoreStoreExists(id))
+            //{
+            //    return NotFound();
+            //}
+            //else
+            //{
+            //    throw;
+            //}
 
-                throw;
-            }
-
-            return NoContent();
+            //throw;
+            //}
+            return CreatedAtAction("GetMainStoreStore", new { id = ChangerObject.MainStoreStoreId }, ChangerObject);
+            //return NoContent();
         }
 
         // POST: api/MainStoreStore

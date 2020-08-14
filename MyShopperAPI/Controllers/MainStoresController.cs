@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,32 +11,28 @@ namespace MyShopperAPI.Controllers
 {
     [Route("api/MainStore")]
     [ApiController]
-    public class MainStoreController : ControllerBase
+    public class MainStoresController : ControllerBase
     {
         private readonly MyShopperContext _context;
 
-        public MainStoreController(MyShopperContext context)
+        public MainStoresController(MyShopperContext context)
         {
             _context = context;
         }
 
-        // GET: api/MainStore
+        // GET: api/MainStores
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MainStore>>> GetMainStore()
         {
             return await _context.MainStore.ToListAsync();
-            //return await _context.MainStore.Include( ms => ms.MainStoreStore ).ToListAsync();
         }
 
-        // GET: api/MainStore/5
+        // GET: api/MainStores/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<MainStore>>> GetMainStore(int id)
+        public async Task<ActionResult<MainStore>> GetMainStore(int id)
         {
-            //var mainStore = await _context.MainStore.FindAsync(id);
-            var mainStore = await _context.MainStore.Include(ms => ms.MainStoreStore).Where(ms => ms.MainStoreId == id).ToListAsync();
+            var mainStore = await _context.MainStore.FindAsync(id);
 
-            //var MainStoreStore = await _context.MainStoreStore.Include( mss => mss.Store ).Where( mss => mss. )
-           
             if (mainStore == null)
             {
                 return NotFound();
@@ -45,7 +41,7 @@ namespace MyShopperAPI.Controllers
             return mainStore;
         }
 
-        // PUT: api/MainStore/5
+        // PUT: api/MainStores/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
@@ -77,7 +73,7 @@ namespace MyShopperAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/MainStore
+        // POST: api/MainStores
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
@@ -89,7 +85,7 @@ namespace MyShopperAPI.Controllers
             return CreatedAtAction("GetMainStore", new { id = mainStore.MainStoreId }, mainStore);
         }
 
-        // DELETE: api/MainStore/5
+        // DELETE: api/MainStores/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<MainStore>> DeleteMainStore(int id)
         {
